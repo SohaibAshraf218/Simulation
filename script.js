@@ -14,7 +14,7 @@ scene.add(light);
 // Object data
 const objects = [];
 
-function createPlanet(name, radius, distance, orbitSpeed, color, details) {
+function createPlanet(name, radius, distance, orbitSpeed, color, details, parent) {
   const geom = new THREE.SphereGeometry(radius, 32, 32);
   const mat = new THREE.MeshStandardMaterial({ color });
   const mesh = new THREE.Mesh(geom, mat);
@@ -23,7 +23,7 @@ function createPlanet(name, radius, distance, orbitSpeed, color, details) {
   const pivot = new THREE.Object3D();
   pivot.add(mesh);
   mesh.position.x = distance;
-  scene.add(pivot);
+  (parent || scene).add(pivot);
 
   objects.push({ mesh, pivot });
 }
@@ -40,32 +40,24 @@ createPlanet('Venus', 0.9, 11, 0.015, 0xffa500, 'Venus is known for its thick at
 // Earth
 createPlanet('Earth', 1, 15, 0.01, 0x0033ff, 'Earth is our home planet.');
 // Moon
-createPlanet('Moon', 0.27, 2, 0.05, 0x888888, 'The Moon orbits Earth.');
-objects[4].pivot = objects[3].mesh; // set moon pivot to Earth
+createPlanet('Moon', 0.27, 2, 0.05, 0x888888, 'The Moon orbits Earth.', objects[3].mesh);
 
 // Mars
 createPlanet('Mars', 0.53, 20, 0.008, 0xff4500, 'Mars is the red planet.');
 // Moons of Mars
-createPlanet('Phobos', 0.12, 1.2, 0.1, 0xaaaaaa, 'Phobos is a moon of Mars.');
-objects[6].pivot = objects[5].mesh;
-createPlanet('Deimos', 0.1, 1.8, 0.07, 0xcccccc, 'Deimos is a moon of Mars.');
-objects[7].pivot = objects[5].mesh;
+createPlanet('Phobos', 0.12, 1.2, 0.1, 0xaaaaaa, 'Phobos is a moon of Mars.', objects[5].mesh);
+createPlanet('Deimos', 0.1, 1.8, 0.07, 0xcccccc, 'Deimos is a moon of Mars.', objects[5].mesh);
 
 // Jupiter
 createPlanet('Jupiter', 3, 26, 0.004, 0xd2b48c, 'Jupiter is the largest planet.');
-createPlanet('Io', 0.29, 3.5, 0.07, 0xffcc33, 'Io is a volcanic moon of Jupiter.');
-objects[9].pivot = objects[8].mesh;
-createPlanet('Europa', 0.25, 5, 0.05, 0xbbbbbb, 'Europa has a subsurface ocean.');
-objects[10].pivot = objects[8].mesh;
-createPlanet('Ganymede', 0.41, 7, 0.04, 0x999999, 'Ganymede is the largest moon of Jupiter.');
-objects[11].pivot = objects[8].mesh;
-createPlanet('Callisto', 0.38, 9, 0.03, 0x888888, 'Callisto is heavily cratered.');
-objects[12].pivot = objects[8].mesh;
+createPlanet('Io', 0.29, 3.5, 0.07, 0xffcc33, 'Io is a volcanic moon of Jupiter.', objects[8].mesh);
+createPlanet('Europa', 0.25, 5, 0.05, 0xbbbbbb, 'Europa has a subsurface ocean.', objects[8].mesh);
+createPlanet('Ganymede', 0.41, 7, 0.04, 0x999999, 'Ganymede is the largest moon of Jupiter.', objects[8].mesh);
+createPlanet('Callisto', 0.38, 9, 0.03, 0x888888, 'Callisto is heavily cratered.', objects[8].mesh);
 
 // Saturn
 createPlanet('Saturn', 2.5, 35, 0.003, 0xdeb887, 'Saturn is famous for its rings.');
-createPlanet('Titan', 0.4, 4, 0.04, 0xffcc66, 'Titan is Saturn\'s largest moon.');
-objects[14].pivot = objects[13].mesh;
+createPlanet('Titan', 0.4, 4, 0.04, 0xffcc66, 'Titan is Saturn\'s largest moon.', objects[13].mesh);
 // Saturn rings
 const ringGeom = new THREE.RingGeometry(3, 4.5, 32);
 const ringMat = new THREE.MeshBasicMaterial({ color: 0x888888, side: THREE.DoubleSide });
@@ -75,13 +67,11 @@ objects[13].mesh.add(ring);
 
 // Uranus
 createPlanet('Uranus', 2, 44, 0.002, 0x66ccff, 'Uranus rotates on its side.');
-createPlanet('Titania', 0.3, 3, 0.05, 0xdddddd, 'Titania is a moon of Uranus.');
-objects[16].pivot = objects[15].mesh;
+createPlanet('Titania', 0.3, 3, 0.05, 0xdddddd, 'Titania is a moon of Uranus.', objects[15].mesh);
 
 // Neptune
 createPlanet('Neptune', 1.9, 52, 0.001, 0x3366ff, 'Neptune has strong winds.');
-createPlanet('Triton', 0.27, 3, 0.04, 0xbbbbbb, 'Triton orbits Neptune.');
-objects[18].pivot = objects[17].mesh;
+createPlanet('Triton', 0.27, 3, 0.04, 0xbbbbbb, 'Triton orbits Neptune.', objects[17].mesh);
 
 // Camera position
 camera.position.z = 80;
@@ -115,11 +105,7 @@ function animate() {
   requestAnimationFrame(animate);
   objects.forEach(o => {
     if (o.pivot) {
-      if (o.pivot instanceof THREE.Object3D) {
-        o.pivot.rotation.y += o.mesh.userData.orbitSpeed;
-      } else if (o.pivot instanceof THREE.Mesh) {
-        o.pivot.rotation.y += o.mesh.userData.orbitSpeed;
-      }
+      o.pivot.rotation.y += o.mesh.userData.orbitSpeed;
     }
   });
   renderer.render(scene, camera);
